@@ -41,8 +41,9 @@ namespace Samples.Net
             // Trust that the methods were returned in the order specified by the user in [Run(order:...)].
             foreach (MethodInfo mi in methods)
             {
-                var parameters = CreateArguments(mi);
-                mi.Invoke(obj, parameters);
+                IEnumerable<Type> parameters = mi.GetParameters().Select(p => p.ParameterType);
+                var arguments = CreateArguments(parameters);
+                mi.Invoke(obj, arguments);
             }
             // Check for dispose and run.
             if (FindDisposeMethod(sample) is MethodInfo dispose) 
