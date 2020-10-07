@@ -41,7 +41,7 @@ namespace Samples.Net
             // Trust that the methods were returned in the order specified by the user in [Run(order:...)].
             foreach (MethodInfo mi in methods)
             {
-                var parameters = CreateParameters(mi);
+                var parameters = CreateArguments(mi);
                 mi.Invoke(obj, parameters);
             }
             // Check for dispose and run.
@@ -95,7 +95,7 @@ namespace Samples.Net
         /// </summary>
         /// <param name="method">MethodInfo to create parameters for.</param>
         /// <returns>An object array containing the parameters.</returns>
-        protected virtual object[] CreateParameters(MethodInfo method)
+        protected virtual object[] CreateArguments(MethodInfo method)
         {
             ParameterInfo[] pis = method.GetParameters();
 
