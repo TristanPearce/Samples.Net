@@ -95,26 +95,24 @@ namespace Samples.Net
         /// </summary>
         /// <param name="method">MethodInfo to create parameters for.</param>
         /// <returns>An object array containing the parameters.</returns>
-        protected virtual object[] CreateArguments(MethodInfo method)
+        protected virtual object[] CreateArguments(IEnumerable<Type> parameterTypes)
         {
-            ParameterInfo[] pis = method.GetParameters();
-
-            if (pis.Length == 0)
+            if (parameterTypes.Count()== 0)
             {
                 return new object[] { };
             }
             else
             {
                 List<object> arguments = new List<object>();
-                foreach (var parameter in pis)
+                foreach (var parameter in parameterTypes)
                 {
                     // ServiceProvider
-                    object argument = Services.GetService(parameter.ParameterType);
+                    object argument = Services.GetService(parameter);
 
                     if (argument != null)
                         arguments.Add(argument);
                     else
-                        throw new Exception($"No value found for parameter '{parameter.Name}' on method '{method.Name}'.");
+                        throw new Exception($"No value found for parameter of type '{parameter.Name}'.");
                 }
                 return arguments.ToArray();
             }
