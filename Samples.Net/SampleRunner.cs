@@ -18,9 +18,12 @@ namespace Samples.Net
         /// </summary>
         protected IServiceProvider Services { get; set; }
 
-        public SampleRunner(IServiceProvider serviceProvider = null)
+        protected IDictionary<string, object> NamedArguments { get; set; }
+
+        public SampleRunner(IServiceProvider serviceProvider = null, IDictionary<string, object> namedArguments = null)
         {
             Services = serviceProvider ?? new ServiceProvider();
+            NamedArguments = namedArguments ?? new Dictionary<string, object>();
         }
 
         /// <summary>
