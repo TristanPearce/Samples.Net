@@ -14,6 +14,11 @@ namespace Samples.Net
             services = new Dictionary<Type, IService>();
         }
 
+        public void AddSingleton<T>(T service)
+        {
+            services.Add(typeof(T), new SingletonService(service));
+        }
+
         public void AddSingleton(object service)
         {
             services.Add(service.GetType(), new SingletonService(service));
