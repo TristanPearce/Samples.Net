@@ -18,6 +18,9 @@ namespace Samples.Net
         /// </summary>
         protected IServiceProvider Services { get; set; }
 
+        /// <summary>
+        /// Provides objects associated with a name.
+        /// </summary>
         protected IDictionary<string, object> NamedArguments { get; set; }
 
         public SampleRunner(IServiceProvider serviceProvider = null, IDictionary<string, object> namedArguments = null)
