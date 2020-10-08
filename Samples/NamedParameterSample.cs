@@ -12,11 +12,9 @@ namespace Samples
 
 
         [Run]
-        public void Login(string token)
+        public void Foo(string apiToken, int callLimit)
         {
-            Console.WriteLine($"Login token: {token}");
+            Console.WriteLine($"Token: {apiToken}, limit: {callLimit}.");
         }
-
-
     }
 }
