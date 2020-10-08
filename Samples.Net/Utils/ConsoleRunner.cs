@@ -22,10 +22,13 @@ namespace Samples.Net
         /// <summary>
         /// Called before the run loop, use to add services for DependecyInjection.
         /// </summary>
-        /// <remarks>
-        /// For easy use, add 'using Microsoft.Extensions.DependencyInjection' for extention methods. 
-        /// </remarks>
         public event Action<ServiceProvider> BuildServiceProvider;
+
+        /// <summary>
+        /// Called before the run loop, use to add named arguments. When running a function, 
+        /// if a parameter is found with a name contained in this dictionary, the value assosciated with it is passed.
+        /// </summary>
+        public event Action<IDictionary<string, object>> BuildNamedArguments;
 
         public ConsoleRunner(ConsoleRunnerInfo info = null)
         {
@@ -60,8 +63,11 @@ namespace Samples.Net
             var provider = new ServiceProvider();
             this.BuildServiceProvider?.Invoke(provider);
 
+            var namedArguments = new Dictionary<string, object>();
+            this.BuildNamedArguments?.Invoke(namedArguments);
+
             // Create runner.
-            this.runner = new SampleRunner(provider);
+            this.runner = new SampleRunner(serviceProvider: provider, namedArguments: namedArguments);
 
             // Run loop
             SampleInfo[] samples;
