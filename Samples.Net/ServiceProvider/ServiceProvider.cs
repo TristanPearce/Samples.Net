@@ -7,11 +7,21 @@ namespace Samples.Net
     public sealed class ServiceProvider : IServiceProvider
     {
 
-        private IDictionary<Type, IService> services; 
+        private readonly IDictionary<Type, IService> services; 
 
         public ServiceProvider()
         {
             services = new Dictionary<Type, IService>();
+        }
+
+        public void AddTransient<T>(Func<T> factory)
+        {
+            services.Add(typeof(T), new TransientService<T>(factory));
+        }
+
+        public void AddTransient(Type type, Func<object> factory)
+        {
+            services.Add(type, new TransientService(factory));
         }
 
         public void AddSingleton<T>(T service)
