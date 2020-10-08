@@ -21,7 +21,7 @@ namespace Samples.Net
 
         public void AddSingleton<T>(T service)
         {
-            services.Add(typeof(T), new SingletonService(service));
+            services.Add(typeof(T), new SingletonService<T>(service));
         }
 
         public object GetService(Type serviceType)

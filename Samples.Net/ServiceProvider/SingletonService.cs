@@ -4,11 +4,11 @@ using System.Text;
 
 namespace Samples.Net
 {
-    internal class SingletonService : IService
+    internal class SingletonService<T> : IService
     {
-        private readonly object instance;
+        private readonly T instance;
 
-        public SingletonService(object instance)
+        public SingletonService(T instance)
         {
             this.instance = instance;                        
         }
