@@ -19,19 +19,9 @@ namespace Samples.Net
             services.Add(typeof(T), new TransientService<T>(factory));
         }
 
-        public void AddTransient(Type type, Func<object> factory)
-        {
-            services.Add(type, new TransientService(factory));
-        }
-
         public void AddSingleton<T>(T service)
         {
             services.Add(typeof(T), new SingletonService(service));
-        }
-
-        public void AddSingleton(object service)
-        {
-            services.Add(service.GetType(), new SingletonService(service));
         }
 
         public object GetService(Type serviceType)
