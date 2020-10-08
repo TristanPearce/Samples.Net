@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Samples.Net.ServiceProvider
+namespace Samples.Net
 {
     internal class SingletonService : IService
     {

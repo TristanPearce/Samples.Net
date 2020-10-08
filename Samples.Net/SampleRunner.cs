@@ -22,7 +22,7 @@ namespace Samples.Net
 
         public SampleRunner(IServiceProvider serviceProvider = null)
         {
-            Services = serviceProvider ?? new ServiceCollection().BuildServiceProvider();
+            Services = serviceProvider ?? new ServiceProvider();
         }
 
         /// <summary>

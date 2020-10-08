@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Samples.Net
 {
-    internal sealed class ServiceProvider : IServiceProvider
+    public sealed class ServiceProvider : IServiceProvider
     {
 
         private IDictionary<Type, IService> services; 
@@ -12,6 +12,11 @@ namespace Samples.Net
         public ServiceProvider()
         {
             services = new Dictionary<Type, IService>();
+        }
+
+        public void AddSingleton(object service)
+        {
+            services.Add(service.GetType(), new SingletonService(service));
         }
 
         public object GetService(Type serviceType)
