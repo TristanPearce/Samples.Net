@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -22,7 +20,7 @@ namespace Samples.Net
 
         public SampleRunner(IServiceProvider serviceProvider = null)
         {
-            Services = serviceProvider ?? new ServiceCollection().BuildServiceProvider();
+            Services = serviceProvider ?? new ServiceProvider();
         }
 
         /// <summary>
@@ -41,8 +39,9 @@ namespace Samples.Net
             // Trust that the methods were returned in the order specified by the user in [Run(order:...)].
             foreach (MethodInfo mi in methods)
             {
-                var parameters = CreateParameters(mi);
-                mi.Invoke(obj, parameters);
+                IEnumerable<Type> parameters = mi.GetParameters().Select(p => p.ParameterType);
+                var arguments = CreateArguments(parameters);
+                mi.Invoke(obj, arguments);
             }
             // Check for dispose and run.
             if (FindDisposeMethod(sample) is MethodInfo dispose) 
@@ -95,26 +94,24 @@ namespace Samples.Net
         /// </summary>
         /// <param name="method">MethodInfo to create parameters for.</param>
         /// <returns>An object array containing the parameters.</returns>
-        protected virtual object[] CreateParameters(MethodInfo method)
+        protected virtual object[] CreateArguments(IEnumerable<Type> parameterTypes)
         {
-            ParameterInfo[] pis = method.GetParameters();
-
-            if (pis.Length == 0)
+            if (parameterTypes.Count()== 0)
             {
                 return new object[] { };
             }
             else
             {
                 List<object> arguments = new List<object>();
-                foreach (var parameter in pis)
+                foreach (var parameter in parameterTypes)
                 {
                     // ServiceProvider
-                    object argument = Services.GetService(parameter.ParameterType);
+                    object argument = Services.GetService(parameter);
 
                     if (argument != null)
                         arguments.Add(argument);
                     else
-                        throw new Exception($"No value found for parameter '{parameter.Name}' on method '{method.Name}'.");
+                        throw new Exception($"No value found for parameter of type '{parameter.Name}'.");
                 }
                 return arguments.ToArray();
             }
@@ -127,14 +124,11 @@ namespace Samples.Net
         /// <returns>An object array containing the parameters.</returns>
         protected virtual object CreateObject(Type type)
         {
-
-            var constructorParameters = FindBestConstructorParameters();
-
-            object obj = Activator.CreateInstance(type, constructorParameters);
-
+            var (constructor, arguments) = FindBestConstructor();
+            object obj = constructor.Invoke(arguments);
             return obj;
 
-            object[] FindBestConstructorParameters()
+            (ConstructorInfo constructor, object[] arguments) FindBestConstructor()
             {
                 ConstructorInfo[] constructors = type.GetConstructors();
 
@@ -142,25 +136,25 @@ namespace Samples.Net
                 if((constructors.Length == 1) &&
                    (constructors[0].GetParameters().Length == 0)) 
                 {
-                    return new object[0];
+                    return (constructors[0], new object[0]);
                 }
 
 
-                foreach (ConstructorInfo constructor in constructors)
+                foreach (ConstructorInfo info in constructors)
                 {
-                    var parameters = constructor.GetParameters();
-                    List<object> arguments = new List<object>();
-                    foreach (var parameter in parameters)
+                    var parameters = info.GetParameters().Select(p => p.ParameterType);
+                    object[] args = null;
+                    try
                     {
-                        // ServiceProvider
-                        object argument = Services.GetService(parameter.ParameterType);
+                        args = CreateArguments(parameters);
 
-                        if (argument != null)
-                            arguments.Add(argument);
+                        // we will only reach this point if no exception occurs.
+                        return (info, args);
                     }
-
-                    if (arguments.Count == parameters.Length)
-                        return arguments.ToArray();
+                    catch (Exception e)
+                    {
+                        // handle exception if needed
+                    }
                 }
 
                 throw new Exception($"No valid constructor could be found for type {type}");

@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -27,7 +25,7 @@ namespace Samples.Net
         /// <remarks>
         /// For easy use, add 'using Microsoft.Extensions.DependencyInjection' for extention methods. 
         /// </remarks>
-        public event Action<ServiceCollection> BuildServiceProvider;
+        public event Action<ServiceProvider> BuildServiceProvider;
 
         public ConsoleRunner(ConsoleRunnerInfo info = null)
         {
@@ -58,11 +56,9 @@ namespace Samples.Net
         /// </summary>
         public void Run()
         {
-
             // Setup dependency injection
-            var services = new ServiceCollection();
-            this.BuildServiceProvider?.Invoke(services);
-            var provider = services.BuildServiceProvider();
+            var provider = new ServiceProvider();
+            this.BuildServiceProvider?.Invoke(provider);
 
             // Create runner.
             this.runner = new SampleRunner(provider);
