@@ -27,6 +27,8 @@ namespace Samples.Net
         /// </remarks>
         public event Action<ServiceProvider> BuildServiceProvider;
 
+        public event Action<IDictionary<string, object>> BuildNamedArguments;
+
         public ConsoleRunner(ConsoleRunnerInfo info = null)
         {
             this.finder = new SampleFinder();
@@ -60,8 +62,11 @@ namespace Samples.Net
             var provider = new ServiceProvider();
             this.BuildServiceProvider?.Invoke(provider);
 
+            var namedArguments = new Dictionary<string, object>();
+            this.BuildNamedArguments?.Invoke(namedArguments);
+
             // Create runner.
-            this.runner = new SampleRunner(provider);
+            this.runner = new SampleRunner(serviceProvider: provider, namedArguments: namedArguments);
 
             // Run loop
             SampleInfo[] samples;
