@@ -126,14 +126,11 @@ namespace Samples.Net
         /// <returns>An object array containing the parameters.</returns>
         protected virtual object CreateObject(Type type)
         {
-
-            var constructorParameters = FindBestConstructorParameters();
-
-            object obj = Activator.CreateInstance(type, constructorParameters);
-
+            var (constructor, arguments) = FindBestConstructor();
+            object obj = constructor.Invoke(arguments);
             return obj;
 
-            object[] FindBestConstructorParameters()
+            (ConstructorInfo constructor, object[] arguments) FindBestConstructor()
             {
                 ConstructorInfo[] constructors = type.GetConstructors();
 
@@ -141,25 +138,25 @@ namespace Samples.Net
                 if((constructors.Length == 1) &&
                    (constructors[0].GetParameters().Length == 0)) 
                 {
-                    return new object[0];
+                    return (constructors[0], new object[0]);
                 }
 
 
-                foreach (ConstructorInfo constructor in constructors)
+                foreach (ConstructorInfo info in constructors)
                 {
-                    var parameters = constructor.GetParameters();
-                    List<object> arguments = new List<object>();
-                    foreach (var parameter in parameters)
+                    var parameters = info.GetParameters().Select(p => p.ParameterType);
+                    object[] args = null;
+                    try
                     {
-                        // ServiceProvider
-                        object argument = Services.GetService(parameter.ParameterType);
+                        args = CreateArguments(parameters);
 
-                        if (argument != null)
-                            arguments.Add(argument);
+                        // we will only reach this point if no exception occurs.
+                        return (info, args);
                     }
-
-                    if (arguments.Count == parameters.Length)
-                        return arguments.ToArray();
+                    catch (Exception e)
+                    {
+                        // handle exception if needed
+                    }
                 }
 
                 throw new Exception($"No valid constructor could be found for type {type}");
