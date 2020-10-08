@@ -42,8 +42,7 @@ namespace Samples.Net
             // Trust that the methods were returned in the order specified by the user in [Run(order:...)].
             foreach (MethodInfo mi in methods)
             {
-                IEnumerable<Type> parameters = mi.GetParameters().Select(p => p.ParameterType);
-                var arguments = CreateArguments(parameters);
+                var arguments = CreateArguments(mi.GetParameters());
                 mi.Invoke(obj, arguments);
             }
             // Check for dispose and run.
@@ -97,24 +96,39 @@ namespace Samples.Net
         /// </summary>
         /// <param name="method">MethodInfo to create parameters for.</param>
         /// <returns>An object array containing the parameters.</returns>
-        protected virtual object[] CreateArguments(IEnumerable<Type> parameterTypes)
+        protected virtual object[] CreateArguments(IEnumerable<ParameterInfo> parameters)
         {
-            if (parameterTypes.Count()== 0)
+            if (parameters.Count()== 0)
             {
                 return new object[] { };
             }
             else
             {
                 List<object> arguments = new List<object>();
-                foreach (var parameter in parameterTypes)
+                foreach (var parameter in parameters)
                 {
+                    // NamedArguments
+                    {
+                        if (NamedArguments.TryGetValue(parameter.Name, out object argument))
+                        {
+                            if (argument.GetType() == parameter.ParameterType)
+                            {
+                                arguments.Add(argument);
+                                continue;
+                            }
+                        }
+                    }
                     // ServiceProvider
-                    object argument = Services.GetService(parameter);
+                    {
+                        object argument = Services.GetService(parameter.ParameterType);
+                        if (argument != null)
+                        {
+                            arguments.Add(argument);
+                            continue;
+                        }
+                    }
 
-                    if (argument != null)
-                        arguments.Add(argument);
-                    else
-                        throw new Exception($"No value found for parameter of type '{parameter.Name}'.");
+                    throw new Exception($"No value found for parameter {parameter.Name} of type '{parameter.ParameterType}'.");
                 }
                 return arguments.ToArray();
             }
@@ -145,11 +159,10 @@ namespace Samples.Net
 
                 foreach (ConstructorInfo info in constructors)
                 {
-                    var parameters = info.GetParameters().Select(p => p.ParameterType);
-                    object[] args = null;
+                    var parameters = info.GetParameters();
                     try
                     {
-                        args = CreateArguments(parameters);
+                        object[] args = CreateArguments(parameters);
 
                         // we will only reach this point if no exception occurs.
                         return (info, args);
