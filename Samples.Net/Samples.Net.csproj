@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Authors>Tristan Pearce</Authors>
     <Description>Easy to use sample creation framework.</Description>
     <Copyright>Copyright 2020 Tristan Pearce</Copyright>
@@ -11,6 +11,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags></PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AssemblyVersion>0.2.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
