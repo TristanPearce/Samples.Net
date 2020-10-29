@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Samples.Net
 {
@@ -45,8 +47,31 @@ namespace Samples.Net
             // Trust that the methods were returned in the order specified by the user in [Run(order:...)].
             foreach (MethodInfo mi in methods)
             {
+                object result = null; 
                 var arguments = CreateArguments(mi.GetParameters());
-                mi.Invoke(obj, arguments);
+                if (IsAsync(mi)) 
+                {
+                    var task = (mi.Invoke(obj, arguments));
+                    if (task is Task<object> taskWithResult)
+                    {
+                        result = taskWithResult.GetAwaiter().GetResult();
+                    }
+                    else if(task is Task taskWithoutResult)
+                    {
+                        taskWithoutResult.Wait();
+                        result = null;
+                    }
+                    else
+                    {
+                        throw new NotSupportedException("The return type of this async method is not supported");
+                    }
+                }
+                else
+                {
+                    result = mi.Invoke(obj, arguments);
+                }
+
+                // do something with result maybe
             }
             // Check for dispose and run.
             if (FindDisposeMethod(sample) is MethodInfo dispose) 
@@ -92,6 +117,18 @@ namespace Samples.Net
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Determine whether a method is async.
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns><see cref="true"/> if the method is async.</returns>
+        protected virtual bool IsAsync(MethodInfo method)
+        {
+            var attribute = method.GetCustomAttribute<AsyncStateMachineAttribute>();
+
+            return (attribute != null);
         }
         
         /// <summary>
