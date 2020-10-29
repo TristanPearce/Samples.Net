@@ -14,4 +14,5 @@ All of the above is covered in the 'Samples' project, have a look at the Samples
 
 ## Features
 - Attribute based approach to setting up samples.
-- Support for dependency injection.
+- Support for dependency injection and named parameters.
+- Support for async methods.
